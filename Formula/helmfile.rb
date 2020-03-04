@@ -12,7 +12,7 @@ class Helmfile < Formula
     end
   
     depends_on "go" => :build
-    depends_on "helm"
+    depends_on "joshkulesza/tap/helm"
   
     def install
       system "go", "build", "-ldflags", "-X github.com/roboll/helmfile/pkg/app/version.Version=v#{version}",
