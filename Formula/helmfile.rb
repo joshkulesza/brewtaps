@@ -1,37 +1,41 @@
 class Helmfile < Formula
-    desc "Deploy Kubernetes Helm Charts"
-    homepage "https://github.com/roboll/helmfile"
-    url "https://github.com/roboll/helmfile/archive/v0.102.0.tar.gz"
-    sha256 "7e9cb2023d1630903c65f8c5bd9b30e5f71299c0cb5d0f783917c46329ab4ca5"
-  
-    bottle do
-      cellar :any_skip_relocation
-      sha256 "6709a260fd7639eb62a31f62ed2a1b741c81639f18d04ac233dd46e05281964d" => :catalina
-      sha256 "7e00ad411ab503306b2c3bb4c8d2939801ac2362b327758b8b78f365cb2c5060" => :mojave
-      sha256 "7ca37d260083d38422d780e150f41d0cbcc01987bdedfb27dfcecdccf36c1650" => :high_sierra
-    end
-  
-    depends_on "go" => :build
-    depends_on "joshkulesza/tap/helm"
-  
-    def install
-      system "go", "build", "-ldflags", "-X github.com/roboll/helmfile/pkg/app/version.Version=v#{version}",
-               "-o", bin/"helmfile", "-v", "github.com/roboll/helmfile"
-    end
-  
-    test do
-      (testpath/"helmfile.yaml").write <<-EOS
-      repositories:
-      - name: stable
-        url: https://kubernetes-charts.storage.googleapis.com/
-  
-      releases:
-      - name: test
-      EOS
-      system Formula["helm"].opt_bin/"helm", "create", "foo"
-      output = "Adding repo stable https://kubernetes-charts.storage.googleapis.com"
-      assert_match output, shell_output("#{bin}/helmfile -f helmfile.yaml repos 2>&1")
-      assert_match version.to_s, shell_output("#{bin}/helmfile -v")
-    end
+  desc "Deploy Kubernetes Helm Charts"
+  homepage "https://github.com/roboll/helmfile"
+  url "https://github.com/roboll/helmfile/archive/v0.111.0.tar.gz"
+  sha256 "91263ca1b058475f78a30da2965a74c03def503d1d1db350544bd486d954a4c4"
+
+  bottle do
+    cellar :any_skip_relocation
+    sha256 "da6898c0278a289578a3864d03015ed32163d2a149251f1701dd5a848aa67290" => :catalina
+    sha256 "aefd1a740181dcdfd17b232405d5920da2bada24f69b49fee3e3179ca1c3df31" => :mojave
+    sha256 "4e67e2a8c375c4f494ba87ae7d8449ea93ba1daa19f0cc4e26e35b1a4e215162" => :high_sierra
   end
-  
+
+  depends_on "go" => :build
+  depends_on "joshkulesza/tap/helm"
+
+  def install
+    system "go", "build", "-ldflags", "-X github.com/roboll/helmfile/pkg/app/version.Version=v#{version}",
+             "-o", bin/"helmfile", "-v", "github.com/roboll/helmfile"
+  end
+
+  test do
+    (testpath/"helmfile.yaml").write <<-EOS
+    repositories:
+    - name: stable
+      url: https://kubernetes-charts.storage.googleapis.com/
+
+    releases:
+    - name: vault                            # name of this release
+      namespace: vault                       # target namespace
+      labels:                                # Arbitrary key value pairs for filtering releases
+        foo: bar
+      chart: roboll/vault-secret-manager     # the chart being installed to create this release, referenced by `repository/chart` syntax
+      version: ~1.24.1                       # the semver of the chart. range constraint is supported
+    EOS
+    system Formula["helm"].opt_bin/"helm", "create", "foo"
+    output = "Adding repo stable https://kubernetes-charts.storage.googleapis.com"
+    assert_match output, shell_output("#{bin}/helmfile -f helmfile.yaml repos 2>&1")
+    assert_match version.to_s, shell_output("#{bin}/helmfile -v")
+  end
+end
