@@ -5,6 +5,7 @@ class Helmfile < Formula
   sha256 "79bcbaded079439ffe01ea8ec5aa886c0673a52a66c24e8d3591c2cd366771e3"
 
   bottle do
+    root_url "https://homebrew.bintray.com/bottles"
     cellar :any_skip_relocation
     sha256 "d5d96066c0a0f9cd7650458f9975c89ad4044bfc7ca532f5dfc50bcea9083731" => :catalina
     sha256 "c675537b56413bde89e67894e3c2fec5a10a431ec03a18f26e58f50b3b4ded93" => :mojave
